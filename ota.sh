@@ -2,23 +2,19 @@
 #
 # Generate latest Google Pixel Beta fingerprints for Play Integrity Fix (PIF)
 #
-# Behavior:
-# 1. Always generates all available beta fingerprints inside:
+# Features:
+# - Supports Android 17 Beta + QPR pages
+# - Falls back to Android 16/15/etc automatically
+# - Generates all available fingerprints inside:
 #       latest_pif/
 #
-# 2. If a codename is passed:
+# - Optional:
 #       ./ota.sh komodo
 #
-#    then it also creates:
+#   Also generates:
 #       ./gms_certified_props.json
 #
-#    using that selected codename fingerprint.
-#
-# Examples:
-#   ./ota.sh
-#   ./ota.sh komodo
-#   ./ota.sh caiman
-#   ./ota.sh husky
+#   using that exact codename fingerprint.
 #
 
 set -euo pipefail
@@ -33,7 +29,7 @@ die()  { echo "[ERROR] $*" >&2; exit 1; }
 
 mkdir -p "$OUTPUT_DIR"
 
-# Preferred priority (newest devices first)
+# Newest devices first
 DEVICE_PRIORITY=(
     frankel
     blazer
@@ -78,15 +74,30 @@ declare -A CODENAME_MAP=(
     [stallion]="Pixel 10a"
 )
 
+# Better version detection:
+# Supports both:
+#   /about/versions/17
+# and
+#   https://developer.android.com/about/versions/17
 extract_versions() {
     curl -sfL "$GOOGLE_URL/about/versions" \
-        | grep -oP 'https://developer\.android\.com/about/versions/\K\d+' \
-        | sort -rnu
+        | grep -oP '/about/versions/\K\d+' \
+        | sort -rnu \
+        | uniq
 }
 
-extract_qpr_pages() {
+# Android 17+ uses:
+#   /about/versions/17/download-ota
+#
+# Older versions often use:
+#   /about/versions/16/qpr3/download-ota
+extract_beta_pages() {
     local version="$1"
 
+    # First check direct beta page
+    echo "0|/about/versions/${version}/download-ota"
+
+    # Then check QPR pages
     curl -sfL "$GOOGLE_URL/about/versions/$version" 2>/dev/null \
         | grep -oP 'href="(/about/versions/'"$version"'/qpr(\d+)/download-ota)"' \
         | sed -E 's/href="([^"]+)"/\1/' \
@@ -159,9 +170,10 @@ EOF
 
     log "Generated: $file"
 
-    # If user passed a codename like:
+    # Optional:
     # ./ota.sh komodo
-    # then generate ./gms_certified_props.json
+    #
+    # -> ./gms_certified_props.json
     if [[ -n "$SELECTED_CODENAME" && "$codename" == "$SELECTED_CODENAME" ]]; then
         cp "$file" "./gms_certified_props.json"
         log "Generated: ./gms_certified_props.json for $codename"
@@ -178,13 +190,18 @@ main() {
     for version in $versions; do
         log "Checking Android $version"
 
-        local qprs
-        qprs=$(extract_qpr_pages "$version") || continue
-        [[ -z "$qprs" ]] && continue
+        local pages
+        pages=$(extract_beta_pages "$version") || continue
+        [[ -z "$pages" ]] && continue
 
-        while IFS='|' read -r qpr_num qpr_path; do
-            local page="${GOOGLE_URL}${qpr_path}"
-            log "Checking QPR$qpr_num → $page"
+        while IFS='|' read -r qpr_num page_path; do
+            local page="${GOOGLE_URL}${page_path}"
+
+            if [[ "$qpr_num" == "0" ]]; then
+                log "Checking Android $version beta page → $page"
+            else
+                log "Checking QPR$qpr_num → $page"
+            fi
 
             local ota_urls
             ota_urls=$(extract_ota_urls "$page")
@@ -200,6 +217,7 @@ main() {
 
                 product=$(echo "$url" | grep -oP '[^/]+_beta' | head -1)
                 codename="${product%_beta}"
+
                 URL_MAP[$codename]="$url"
             done <<< "$ota_urls"
 
@@ -236,8 +254,9 @@ main() {
                 generated=1
             done
 
+            # Stop after newest valid beta branch found
             [[ "$generated" -eq 1 ]] && exit 0
-        done <<< "$qprs"
+        done <<< "$pages"
     done
 
     die "No valid beta fingerprints found"
