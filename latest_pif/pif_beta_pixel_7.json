@@ -1,12 +1,12 @@
 {
   "MANUFACTURER": "Google",
   "MODEL": "Pixel 7",
-  "FINGERPRINT": "google/panther_beta/panther:17/CP21.260330.011.A1/15501256:user/release-keys",
+  "FINGERPRINT": "google/panther_beta/panther:17/CP41.260828.005.A6/16319837:user/release-keys",
   "BRAND": "google",
   "PRODUCT": "panther_beta",
   "DEVICE": "panther",
   "VERSION.RELEASE": "17",
-  "ID": "CP21.260330.011.A1",
-  "VERSION.SECURITY_PATCH": "2026-04-05",
+  "ID": "CP41.260828.005.A6",
+  "VERSION.SECURITY_PATCH": "2026-07-05",
   "VERSION.DEVICE_INITIAL_SDK_INT": "32"
 }

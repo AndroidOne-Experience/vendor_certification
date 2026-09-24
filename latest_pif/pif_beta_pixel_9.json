@@ -1,12 +1,12 @@
 {
   "MANUFACTURER": "Google",
   "MODEL": "Pixel 9",
-  "FINGERPRINT": "google/tokay_beta/tokay:17/CP21.260330.011/15499021:user/release-keys",
+  "FINGERPRINT": "google/tokay_beta/tokay:17/CP41.260828.004.A8/16319058:user/release-keys",
   "BRAND": "google",
   "PRODUCT": "tokay_beta",
   "DEVICE": "tokay",
   "VERSION.RELEASE": "17",
-  "ID": "CP21.260330.011",
-  "VERSION.SECURITY_PATCH": "2026-05-05",
+  "ID": "CP41.260828.004.A8",
+  "VERSION.SECURITY_PATCH": "2026-08-05",
   "VERSION.DEVICE_INITIAL_SDK_INT": "32"
 }

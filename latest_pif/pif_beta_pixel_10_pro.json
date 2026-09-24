@@ -1,12 +1,12 @@
 {
   "MANUFACTURER": "Google",
   "MODEL": "Pixel 10 Pro",
-  "FINGERPRINT": "google/blazer_beta/blazer:17/CP21.260330.011/15499021:user/release-keys",
+  "FINGERPRINT": "google/blazer_beta/blazer:17/CP41.260828.004.A8/16319058:user/release-keys",
   "BRAND": "google",
   "PRODUCT": "blazer_beta",
   "DEVICE": "blazer",
   "VERSION.RELEASE": "17",
-  "ID": "CP21.260330.011",
-  "VERSION.SECURITY_PATCH": "2026-05-05",
+  "ID": "CP41.260828.004.A8",
+  "VERSION.SECURITY_PATCH": "2026-08-05",
   "VERSION.DEVICE_INITIAL_SDK_INT": "32"
 }
